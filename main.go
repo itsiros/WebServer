@@ -5,12 +5,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"structs"
+	"strings"
 	"sync/atomic"
 )
 
 type apiConf struct {
 	fileserverHits atomic.Int32
+}
+
+type parameters struct {
+	Body string `json:"body"`
+}
+
+type returnVals struct {
+	Cleaned_body string `json:"cleaned_body"`
 }
 
 func (cfg *apiConf) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -42,18 +50,55 @@ func handlerReadiness(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(http.StatusText(http.StatusOK)))
 }
 
-func hanlderJSonResponce(w http.ResponseWriter, r *http.Request) {
+func respondWithError(w http.ResponseWriter, code int, msg string) {
+	w.WriteHeader(code)
+	w.Write([]byte(msg))
+}
 
-	var returnVals struct {
-		reqErr     string
-		valid      bool
-		StatusCode int
+func respondJSON(resp *returnVals, w http.ResponseWriter, returnStatus int) {
+	dat, err := json.Marshal(resp)
+	if err != nil {
+		log.Printf("Error marshalling JSON: %s", err)
+		respondWithError(w, 500, "")
+		return
 	}
-	if len(r.Body) != 140 {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(returnStatus)
+	w.Write(dat)
+}
 
+func hanlderJSONResponce(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		log.Printf("Error decoding parameters: %s", err)
+		respondWithError(w, 500, "Something went wrong")
+		return
 	}
-	json.Marshal()
-	w.WriteHeader(http.StatusOK)
+
+	if len(params.Body) > 140 {
+		respondWithError(w, 400, "")
+		return
+	}
+
+	const stars = "****"
+	b := strings.ToLower(params.Body)
+	badWordList := []string{"kerfuffle", "sharbert", "fornax"}
+
+	for _, w := range badWordList {
+		for {
+			idx := strings.Index(b, w)
+			if idx == -1 {
+				break
+			}
+
+			params.Body = params.Body[:idx] + stars + params.Body[idx+len(w):]
+			b = b[:idx] + stars + b[idx+len(w):]
+		}
+	}
+
+	respondJSON(&returnVals{params.Body}, w, 200)
 }
 
 func main() {
@@ -66,7 +111,7 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("GET /admin/metrics", cfg.handlerHits)
 	mux.HandleFunc("POST /admin/reset", cfg.handlerResetHits)
-	mux.HandleFunc("POST /api/validate_chirp", cfg.handlerResetHits)
+	mux.HandleFunc("POST /api/validate_chirp", hanlderJSONResponce)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
