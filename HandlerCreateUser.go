@@ -5,17 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
-
-	"github.com/google/uuid"
 )
-
-type userData struct {
-	Id        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-}
 
 func (cfg *apiConf) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type createUser struct {
@@ -40,14 +30,7 @@ func (cfg *apiConf) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := &userData{
-		Id:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
-	}
-
-	dat, err := json.Marshal(resp)
+	dat, err := json.Marshal(user)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Marshal failed", err)
 		return
