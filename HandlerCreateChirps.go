@@ -2,12 +2,22 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/tsironi93/WebServer/internal/database"
 )
+
+type Chirp struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Body      string    `json:"body"`
+	UserID    uuid.UUID `json:"user_id"`
+}
 
 func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
@@ -17,15 +27,41 @@ func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
+	decoder.Decode(&params)
+	// err := decoder.Decode(&params)
+	// if err != nil {
+	// 	respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+	// 	return
+	// }
+
+	cleaned, err := validateChirp(params.Body)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", err)
 		return
 	}
 
-	const maxChirpLength = 140
-	if len(params.Body) > maxChirpLength {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
+	chirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
+		Body:   cleaned,
+		UserID: params.UserID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create chirp", err)
 		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, Chirp{
+		ID:        chirp.ID,
+		CreatedAt: chirp.CreatedAt,
+		UpdatedAt: chirp.UpdatedAt,
+		Body:      chirp.Body,
+		UserID:    chirp.UserID,
+	})
+}
+
+func validateChirp(body string) (string, error) {
+	const maxChirpLength = 140
+	if len(body) > maxChirpLength {
+		return "", errors.New("Chirp is too long")
 	}
 
 	badWords := map[string]struct{}{
@@ -33,23 +69,8 @@ func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 		"sharbert":  {},
 		"fornax":    {},
 	}
-	cleaned := getCleanedBody(params.Body, badWords)
-
-	params.Body = cleaned
-	chirp, err := cfg.db.CreateChirp(
-		r.Context(),
-		database.CreateChirpParams{
-			Body:   cleaned,
-			UserID: params.UserID,
-		},
-	)
-
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to create chirp", err)
-		return
-	}
-
-	respondWithJSON(w, http.StatusCreated, chirp)
+	cleaned := getCleanedBody(body, badWords)
+	return cleaned, nil
 }
 
 func getCleanedBody(body string, badWords map[string]struct{}) string {
@@ -60,6 +81,7 @@ func getCleanedBody(body string, badWords map[string]struct{}) string {
 			words[i] = "****"
 		}
 	}
+
 	cleaned := strings.Join(words, " ")
 	return cleaned
 }

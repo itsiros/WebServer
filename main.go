@@ -39,11 +39,12 @@ func main() {
 	}
 
 	dbQueries := database.New(db)
-	mux := http.NewServeMux()
 	cfg := &apiConf{
 		db:       dbQueries,
 		platform: platform,
 	}
+
+	mux := http.NewServeMux()
 
 	fsHandler := cfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
 	mux.Handle("/app/", fsHandler)
@@ -55,6 +56,8 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", cfg.handlerGetChirps)
 	mux.HandleFunc("POST /api/chirps", cfg.handlerCreateChirp)
 	mux.HandleFunc("POST /api/users", cfg.HandlerCreateUser)
+
+	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.HandlerSingleChirp)
 
 	srv := &http.Server{
 		Addr:    ":" + port,

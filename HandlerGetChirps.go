@@ -3,34 +3,18 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func (cfg *apiConf) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
-	Allchirps, err := cfg.db.GetAllChirps(r.Context())
+	chirps, err := cfg.db.GetAllChirps(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error getting chirps from database", err)
 		return
 	}
 
-	resp := make([]struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Body      string    `json:"body"`
-		UserID    uuid.UUID `json:"user_id"`
-	}, len(Allchirps))
-
-	for i, c := range Allchirps {
-		resp[i] = struct {
-			ID        uuid.UUID `json:"id"`
-			CreatedAt time.Time `json:"created_at"`
-			UpdatedAt time.Time `json:"updated_at"`
-			Body      string    `json:"body"`
-			UserID    uuid.UUID `json:"user_id"`
-		}{
+	resp := make([]Chirp, len(chirps))
+	for i, c := range chirps {
+		resp[i] = Chirp{
 			ID:        c.ID,
 			CreatedAt: c.CreatedAt,
 			UpdatedAt: c.UpdatedAt,
