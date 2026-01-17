@@ -14,4 +14,7 @@
 # Allow assets folder
 !assets/
 !assets/**
-
+!sql/
+!sql/**
+!internal/
+!internal/**
