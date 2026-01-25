@@ -20,32 +20,36 @@ type Chirp struct {
 }
 
 func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-		Body   string    `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
+
+	type params struct {
+		Body   string `json:"body"`
+		UserID string `json:"user_id"`
 	}
 
-	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
-	decoder.Decode(&params)
-	// err := decoder.Decode(&params)
-	// if err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
-	// 	return
-	// }
+	var p params
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+		return
+	}
 
-	cleaned, err := validateChirp(params.Body)
+	cleaned, err := validateChirp(p.Body)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Chirp is too long", err)
 		return
 	}
 
+	userUUID, err := uuid.Parse(p.UserID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid user_id", err)
+		return
+	}
+
 	chirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleaned,
-		UserID: params.UserID,
+		UserID: userUUID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to create chirp", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp", err)
 		return
 	}
 

@@ -30,7 +30,7 @@ func (cfg *apiConf) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !strings.Contains(create.Email, "@") || !strings.Contains(create.Email, ".") {
-		respondWithError(w, http.StatusUnauthorized, "Wrong email format", fmt.Errorf("Not valid email"))
+		respondWithError(w, http.StatusBadRequest, "Wrong email format", fmt.Errorf("Not valid email"))
 		return
 	}
 
@@ -40,13 +40,10 @@ func (cfg *apiConf) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dat, err := json.Marshal(user)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Marshal failed", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-	w.Write(dat)
+	respondWithJSON(w, http.StatusCreated, User{
+		ID:        user.ID,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	})
 }

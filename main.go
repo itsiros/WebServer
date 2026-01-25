@@ -32,11 +32,15 @@ func main() {
 		log.Fatal("PLATFORM must be set")
 	}
 
-	db, err := sql.Open("postgres", dbURL)
+	db, err := sql.Open("postgres", "postgres://postgres:@localhost:5432/chirpy?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
+
+	if err := db.Ping(); err != nil {
+		log.Fatal("Could not connect to DB:", err)
+	}
+	log.Println("Successfully connected to DB!")
 
 	dbQueries := database.New(db)
 	cfg := &apiConf{

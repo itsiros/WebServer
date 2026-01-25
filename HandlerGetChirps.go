@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -23,13 +22,5 @@ func (cfg *apiConf) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	dat, err := json.Marshal(resp)
-	if err != nil {
-		respondWithError(w, 500, "JSON encoding failed", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(dat)
+	respondWithJSON(w, http.StatusOK, resp)
 }
