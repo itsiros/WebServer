@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/tsironi93/WebServer/internal/auth"
 )
@@ -10,8 +11,9 @@ import (
 func (cfg *apiConf) HandlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email            string `json:"email"`
+		Password         string `json:"password"`
+		ExpiresInSeconds uint   `json:"expires_in_serconds"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -38,10 +40,24 @@ func (cfg *apiConf) HandlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	expires := time.Hour
+	if log.ExpiresInSeconds > 0 {
+		if log.ExpiresInSeconds < 3600 {
+			expires = time.Duration(log.ExpiresInSeconds) * time.Second
+		}
+	}
+
+	token, err := auth.MakeJWT(userID.ID, cfg.JWTSecret, expires)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "failed to create token", err)
+		return
+	}
+
 	respondWithJSON(w, http.StatusOK, User{
 		ID:        userID.ID,
 		CreatedAt: userID.CreatedAt,
 		UpdatedAt: userID.UpdatedAt,
 		Email:     userID.Email,
+		Token:     token,
 	})
 }

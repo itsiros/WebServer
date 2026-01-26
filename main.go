@@ -16,6 +16,7 @@ type apiConf struct {
 	fileserverHits atomic.Int32
 	db             *database.Queries
 	platform       string
+	JWTSecret      string
 }
 
 func main() {
@@ -31,6 +32,10 @@ func main() {
 	if platform == "" {
 		log.Fatal("PLATFORM must be set")
 	}
+	secret := os.Getenv("SECRET")
+	if secret == "" {
+		log.Fatal("Secret must be set")
+	}
 
 	db, err := sql.Open("postgres", "postgres://postgres:@localhost:5432/chirpy?sslmode=disable")
 	if err != nil {
@@ -44,8 +49,9 @@ func main() {
 
 	dbQueries := database.New(db)
 	cfg := &apiConf{
-		db:       dbQueries,
-		platform: platform,
+		db:        dbQueries,
+		platform:  platform,
+		JWTSecret: secret,
 	}
 
 	mux := http.NewServeMux()

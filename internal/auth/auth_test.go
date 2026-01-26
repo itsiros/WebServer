@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
@@ -94,5 +95,66 @@ func TestValidateJWTExpired(t *testing.T) {
 	_, err = ValidateJWT(token, secret)
 	if err == nil {
 		t.Fatal("expected error for expired token")
+	}
+}
+
+func TestGetBearerToken(t *testing.T) {
+	tests := []struct {
+		name      string
+		headers   http.Header
+		wantToken string
+		wantErr   bool
+	}{
+		{
+			name: "valid bearer token",
+			headers: http.Header{
+				"Authorization": []string{"Bearer abc123token"},
+			},
+			wantToken: "abc123token",
+			wantErr:   false,
+		},
+		{
+			name:      "missing header",
+			headers:   http.Header{},
+			wantToken: "",
+			wantErr:   true,
+		},
+		{
+			name: "wrong prefix",
+			headers: http.Header{
+				"Authorization": []string{"Token abc123token"},
+			},
+			wantToken: "",
+			wantErr:   true,
+		},
+		{
+			name: "empty token",
+			headers: http.Header{
+				"Authorization": []string{"Bearer "},
+			},
+			wantToken: "",
+			wantErr:   true,
+		},
+		{
+			name: "extra spaces",
+			headers: http.Header{
+				"Authorization": []string{"Bearer   xyz   "},
+			},
+			wantToken: "xyz",
+			wantErr:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetBearerToken(tt.headers)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetBearerToken() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.wantToken {
+				t.Errorf("GetBearerToken() = %v, want %v", got, tt.wantToken)
+			}
+		})
 	}
 }

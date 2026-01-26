@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tsironi93/WebServer/internal/auth"
 	"github.com/tsironi93/WebServer/internal/database"
 )
 
@@ -26,6 +27,18 @@ func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 		UserID string `json:"user_id"`
 	}
 
+	tokenStr, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "missing or invalid token", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(tokenStr, cfg.JWTSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "invalid token", err)
+		return
+	}
+
 	var p params
 	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
@@ -38,15 +51,9 @@ func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userUUID, err := uuid.Parse(p.UserID)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid user_id", err)
-		return
-	}
-
 	chirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleaned,
-		UserID: userUUID,
+		UserID: userID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp", err)
