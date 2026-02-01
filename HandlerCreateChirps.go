@@ -20,13 +20,25 @@ type Chirp struct {
 	UserID    uuid.UUID `json:"user_id"`
 }
 
+type Params struct {
+	Body   string `json:"body"`
+	UserID string `json:"user_id"`
+}
+
+// handlerCreateChirp godoc
+// @Summary Create a new chirp
+// @Description Creates a new chirp for the authenticated user. Requires a valid Bearer JWT token.
+// @Tags chirps
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param chirp body Params true "Chirp payload"
+// @Success 201 {object} Chirp
+// @Failure 400 {object} map[string]string "Bad request (invalid body)"
+// @Failure 401 {object} map[string]string "Unauthorized (missing or invalid token)"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /chirps [get]
 func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
-
-	type params struct {
-		Body   string `json:"body"`
-		UserID string `json:"user_id"`
-	}
-
 	tokenStr, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "missing or invalid token", err)
@@ -39,7 +51,7 @@ func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var p params
+	var p Params
 	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
 		return

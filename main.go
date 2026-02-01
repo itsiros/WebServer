@@ -9,6 +9,8 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "github.com/tsironi93/WebServer/docs"
 	"github.com/tsironi93/WebServer/internal/database"
 )
 
@@ -19,10 +21,7 @@ type apiConf struct {
 	JWTSecret      string
 }
 
-func main() {
-	const filepathRoot = "."
-	const port = "8080"
-
+func loadEnvAndConnect() apiConf {
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
@@ -48,12 +47,18 @@ func main() {
 	log.Println("Successfully connected to DB!")
 
 	dbQueries := database.New(db)
-	cfg := &apiConf{
+	return apiConf{
 		db:        dbQueries,
 		platform:  platform,
 		JWTSecret: secret,
 	}
+}
 
+func main() {
+	const filepathRoot = "."
+	const port = "8080"
+
+	cfg := loadEnvAndConnect()
 	mux := http.NewServeMux()
 
 	fsHandler := cfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
@@ -67,8 +72,11 @@ func main() {
 	mux.HandleFunc("POST /api/chirps", cfg.handlerCreateChirp)
 	mux.HandleFunc("POST /api/users", cfg.HandlerCreateUser)
 	mux.HandleFunc("POST /api/login", cfg.HandlerLogin)
+	mux.HandleFunc("POST /api/refresh", cfg.HandlerTokenRefresh)
+	mux.HandleFunc("POST /api/revoke", cfg.HandlerTokenRevoke)
 
 	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.HandlerSingleChirp)
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
