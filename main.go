@@ -68,14 +68,20 @@ func main() {
 	mux.HandleFunc("POST /admin/reset", cfg.handlerResetHits)
 
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
+
 	mux.HandleFunc("GET /api/chirps", cfg.handlerGetChirps)
 	mux.HandleFunc("POST /api/chirps", cfg.handlerCreateChirp)
+
 	mux.HandleFunc("POST /api/users", cfg.HandlerCreateUser)
+	mux.HandleFunc("PUT /api/users", cfg.HandlerUserUpdate)
+
 	mux.HandleFunc("POST /api/login", cfg.HandlerLogin)
 	mux.HandleFunc("POST /api/refresh", cfg.HandlerTokenRefresh)
 	mux.HandleFunc("POST /api/revoke", cfg.HandlerTokenRevoke)
 
 	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.HandlerSingleChirp)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.HandlerChirpsDelete)
+
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	srv := &http.Server{

@@ -21,3 +21,7 @@ SELECT id, created_at, updated_at, body, user_id
 SELECT id, created_at, updated_at, body, user_id
   FROM chirps
   WHERE id = $1;
+
+-- name: DeleteSingleChirp :exec
+DELETE FROM chirps
+  WHERE id = $1;
