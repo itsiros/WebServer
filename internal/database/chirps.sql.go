@@ -63,11 +63,11 @@ func (q *Queries) DeleteSingleChirp(ctx context.Context, id uuid.UUID) error {
 const getChirps = `-- name: GetChirps :many
 SELECT id, created_at, updated_at, body, user_id
 FROM chirps
-WHERE ($1::uuid IS NULL OR user_id = $1)
+WHERE ($1 = '00000000-0000-0000-0000-000000000000'::uuid OR user_id = $1)
 ORDER BY created_at
 `
 
-func (q *Queries) GetChirps(ctx context.Context, dollar_1 uuid.UUID) ([]Chirp, error) {
+func (q *Queries) GetChirps(ctx context.Context, dollar_1 interface{}) ([]Chirp, error) {
 	rows, err := q.db.QueryContext(ctx, getChirps, dollar_1)
 	if err != nil {
 		return nil, err

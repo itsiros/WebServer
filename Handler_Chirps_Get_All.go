@@ -2,12 +2,19 @@ package main
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/google/uuid"
 )
 
 func (cfg *apiConf) HandlerChirpsGetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	isDesc := false
+
+	sortOrder := r.URL.Query().Get("sort")
+	if sortOrder == "desc" {
+		isDesc = true
+	}
 
 	var authorID uuid.UUID = uuid.Nil
 	if s := r.URL.Query().Get("author_id"); s != "" {
@@ -36,5 +43,10 @@ func (cfg *apiConf) HandlerChirpsGetAll(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	if isDesc {
+		sort.Slice(resp, func(i, j int) bool {
+			return resp[j].CreatedAt.Before(resp[i].CreatedAt)
+		})
+	}
 	respondWithJSON(w, http.StatusOK, resp)
 }
