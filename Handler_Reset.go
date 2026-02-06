@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (cfg *apiConf) handlerResetHits(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConf) HandlerResetHits(w http.ResponseWriter, r *http.Request) {
 	if cfg.platform != "dev" {
 		respondWithError(w, http.StatusForbidden, "Forbidden", fmt.Errorf("NOPE"))
 		return

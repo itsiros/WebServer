@@ -13,11 +13,12 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Token     string    `json:"token"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	Token       string    `json:"token"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 type createUser struct {
@@ -25,7 +26,7 @@ type createUser struct {
 	HashedPassword string `json:"password"`
 }
 
-// HandlerCreateUser godoc
+// HandlerUserCreate godoc
 // @Summary Create a new user
 // @Description Creates a new user with email and password, and returns the user info with a JWT token
 // @Tags auth, users
@@ -36,7 +37,7 @@ type createUser struct {
 // @Failure 400 {object} map[string]string "Bad request (invalid email or password)"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /users [post]
-func (cfg *apiConf) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConf) HandlerUserCreate(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	create := createUser{}
@@ -73,10 +74,11 @@ func (cfg *apiConf) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusCreated, User{
-		ID:        user.ID,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Token:     token,
+		ID:          user.ID,
+		Email:       user.Email,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		Token:       token,
+		IsChirpyRed: user.IsChirpyRed,
 	})
 }

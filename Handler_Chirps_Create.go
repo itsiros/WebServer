@@ -25,7 +25,7 @@ type Params struct {
 	UserID string `json:"user_id"`
 }
 
-// handlerCreateChirp godoc
+// HandlerCreateChirp godoc
 // @Summary Create a new chirp
 // @Description Creates a new chirp for the authenticated user. Requires a valid Bearer JWT token.
 // @Tags chirps
@@ -38,7 +38,7 @@ type Params struct {
 // @Failure 401 {object} map[string]string "Unauthorized (missing or invalid token)"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /chirps [get]
-func (cfg *apiConf) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConf) HandlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	tokenStr, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "missing or invalid token", err)

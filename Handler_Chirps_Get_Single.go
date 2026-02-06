@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConf) HandlerSingleChirp(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConf) HandlerChirpsGetSingle(w http.ResponseWriter, r *http.Request) {
 	uuidString := r.PathValue("chirpID")
 	chirpUUID, err := uuid.Parse(uuidString)
 	if err != nil {

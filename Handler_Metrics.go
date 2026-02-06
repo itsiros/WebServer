@@ -12,7 +12,7 @@ func (cfg *apiConf) middlewareMetricsInc(next http.Handler) http.Handler {
 	})
 }
 
-func (cfg *apiConf) handlerMetrics(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConf) HandlerMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	adminMetrics := fmt.Sprintf(`
