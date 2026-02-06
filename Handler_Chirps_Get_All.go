@@ -2,12 +2,26 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 func (cfg *apiConf) HandlerChirpsGetAll(w http.ResponseWriter, r *http.Request) {
-	chirps, err := cfg.db.GetAllChirps(r.Context())
+	ctx := r.Context()
+
+	var authorID uuid.UUID = uuid.Nil
+	if s := r.URL.Query().Get("author_id"); s != "" {
+		id, err := uuid.Parse(s)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "couldn't parse author_id", err)
+			return
+		}
+		authorID = id
+	}
+
+	chirps, err := cfg.db.GetChirps(ctx, authorID)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Error getting chirps from database", err)
+		respondWithError(w, http.StatusInternalServerError, "error getting chirps", err)
 		return
 	}
 

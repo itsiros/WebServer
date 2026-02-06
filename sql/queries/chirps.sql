@@ -12,10 +12,12 @@ RETURNING *;
 -- name: DeleteAllChirps :exec
 DELETE FROM chirps;
 
--- name: GetAllChirps :many
+-- name: GetChirps :many
 SELECT id, created_at, updated_at, body, user_id
-  FROM chirps
-  ORDER BY created_at;
+FROM chirps
+WHERE ($1::uuid IS NULL OR user_id = $1)
+ORDER BY created_at;
+
 
 -- name: GetSingleChirp :one
 SELECT id, created_at, updated_at, body, user_id
