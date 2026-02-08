@@ -17,6 +17,19 @@ type ResponseUserUpdate struct {
 	Email string `json:"email"`
 }
 
+// HandlerUserUpdate godoc
+// @Summary Update user password/email
+// @Description Update the authenticated user's password and/or email. Requires Bearer JWT token.
+// @Tags users, auth
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <JWT token>"
+// @Param user body RequestUserUpdate true "User update payload"
+// @Success 200 {object} ResponseUserUpdate
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/users [put]
 func (cfg *apiConf) HandlerUserUpdate(w http.ResponseWriter, r *http.Request) {
 	bearer, err := auth.GetBearerToken(r.Header)
 	if err != nil {

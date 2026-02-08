@@ -6,6 +6,17 @@ import (
 	"github.com/google/uuid"
 )
 
+// HandlerChirpsGetSingle godoc
+// @Summary Get a single chirp
+// @Description Get a chirp by its UUID
+// @Tags chirps
+// @Accept json
+// @Produce json
+// @Param chirpID path string true "Chirp UUID"
+// @Success 200 {object} Chirp
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/chirps/{chirpID} [get]
 func (cfg *apiConf) HandlerChirpsGetSingle(w http.ResponseWriter, r *http.Request) {
 	uuidString := r.PathValue("chirpID")
 	chirpUUID, err := uuid.Parse(uuidString)

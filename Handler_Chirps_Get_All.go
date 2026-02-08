@@ -7,6 +7,18 @@ import (
 	"github.com/google/uuid"
 )
 
+// HandlerChirpsGetAll godoc
+// @Summary List chirps
+// @Description Returns a list of chirps. Optional query params: author_id (UUID) and sort (asc|desc).
+// @Tags chirps
+// @Accept json
+// @Produce json
+// @Param author_id query string false "Author UUID"
+// @Param sort query string false "Sort order (asc|desc)"
+// @Success 200 {array} Chirp
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/chirps [get]
 func (cfg *apiConf) HandlerChirpsGetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	isDesc := false

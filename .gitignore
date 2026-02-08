@@ -18,3 +18,6 @@
 !sql/**
 !internal/
 !internal/**
+
+# Allow README.md
+!README.md

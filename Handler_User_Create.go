@@ -36,7 +36,7 @@ type createUser struct {
 // @Success 201 {object} User
 // @Failure 400 {object} map[string]string "Bad request (invalid email or password)"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /users [post]
+// @Router /api/users [post]
 func (cfg *apiConf) HandlerUserCreate(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)

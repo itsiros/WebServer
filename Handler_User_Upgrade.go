@@ -17,6 +17,18 @@ type Data struct {
 	UserID uuid.UUID `json:"user_id"`
 }
 
+// HandlerUserUpgradeToRed godoc
+// @Summary Handle Polka webhook for user upgrade
+// @Description Receives Polka webhook events and upgrades a user to 'Chirpy Red'. Expects Authorization header with ApiKey.
+// @Tags webhooks, users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "ApiKey <key>"
+// @Param payload body Payload true "Webhook payload"
+// @Success 204
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/polka/webhooks [post]
 func (cfg *apiConf) HandlerUserUpgradeToRed(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)

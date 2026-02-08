@@ -31,13 +31,13 @@ type Params struct {
 // @Tags chirps
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Bearer JWT token"
+// @Param Authorization header string true "Bearer <JWT token>"
 // @Param chirp body Params true "Chirp payload"
 // @Success 201 {object} Chirp
 // @Failure 400 {object} map[string]string "Bad request (invalid body)"
 // @Failure 401 {object} map[string]string "Unauthorized (missing or invalid token)"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /chirps [get]
+// @Router /api/chirps [post]
 func (cfg *apiConf) HandlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	tokenStr, err := auth.GetBearerToken(r.Header)
 	if err != nil {

@@ -11,6 +11,18 @@ type RefreshResp struct {
 	Token string `json:"token"`
 }
 
+// HandlerTokenRefresh godoc
+// @Summary Refresh JWT token
+// @Description Exchanges a refresh token (provided in Authorization header) for a new JWT token.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <refresh token>"
+// @Success 200 {object} RefreshResp
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/refresh [post]
 func (cfg *apiConf) HandlerTokenRefresh(w http.ResponseWriter, r *http.Request) {
 
 	bearer, err := auth.GetBearerToken(r.Header)

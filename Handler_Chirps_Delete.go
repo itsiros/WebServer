@@ -7,6 +7,19 @@ import (
 	"github.com/tsironi93/WebServer/internal/auth"
 )
 
+// HandlerChirpsDelete godoc
+// @Summary Delete a chirp
+// @Description Deletes a chirp by UUID. Requires Bearer JWT token of the owner.
+// @Tags chirps
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <JWT token>"
+// @Param chirpID path string true "Chirp UUID"
+// @Success 204
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/chirps/{chirpID} [delete]
 func (cfg *apiConf) HandlerChirpsDelete(w http.ResponseWriter, r *http.Request) {
 	bearer, err := auth.GetBearerToken(r.Header)
 	if err != nil {

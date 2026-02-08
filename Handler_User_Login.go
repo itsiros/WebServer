@@ -21,6 +21,18 @@ type LoginResponse struct {
 	IsChirpyRed  bool      `json:"is_chirpy_red"`
 }
 
+// HandlerUserLogin godoc
+// @Summary User login
+// @Description Authenticate user with email and password, returns JWT and refresh token
+// @Tags auth, users
+// @Accept json
+// @Produce json
+// @Param credentials body object true "Login credentials"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/login [post]
 func (cfg *apiConf) HandlerUserLogin(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
