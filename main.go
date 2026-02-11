@@ -42,7 +42,7 @@ func loadEnvAndConnect() apiConf {
 		log.Fatal("POLKA_KEY must be set")
 	}
 
-	db, err := sql.Open("postgres", "postgres://postgres:@localhost:5432/chirpy?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
